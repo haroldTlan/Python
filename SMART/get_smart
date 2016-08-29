@@ -1,0 +1,74 @@
+#!/usr/bin/env python
+import commands
+
+def smart_filter(x):
+	if len(x) > 0:
+		return x
+
+#class Smart_Trans:
+#	ID = info[0]
+#	ATTRIBUTE_NAME = info[1]
+#	FLAG = info[2]
+#	VALUE = info[3]
+#	WORST = info[4]
+#	THRESH = info[5]
+#	TYPE = info[6]
+#	UPDATED = info[7]
+#	RAW_VALUE = info[-1]
+	
+def Smart_trans(info):
+	infos = {}
+	infos['ID'] = info[0]
+	infos['ATTRIBUTE_NAME'] = info[1]
+	infos['FLAG'] = info[2]
+	infos['VALUE'] = info[3]
+	infos['WORST'] = info[4]
+	infos['THRESH'] = info[5]
+	infos['TYPE'] = info[6]
+	infos['UPDATED'] = info[7]
+	infos['RAW_VALUE'] = info[-1]
+
+	return infos
+
+def Smart_select(dev):
+	device = []
+	devices = {}
+  	smart_infos = commands.getoutput("smartctl -A /dev/%s"%dev[1].strip())
+        temps = smart_infos.split('RAW_VALUE')[-1]
+	temp = filter(smart_filter, temps.split('\n'))
+	for each in temp:
+	  a = Smart_trans(filter(smart_filter, each.split(' ')))
+	  device.append(a)
+	  devices['smart'] = device
+	  devices['device'] = dev[0]
+
+	return devices
+
+if __name__ == '__main__':
+	locations = commands.getoutput("python /home/zonion/speedio/show_location.pyc")
+	location = locations.split('\n')
+
+	if len(location[0]) >12:
+	  	loc = location[2:]
+		#dev_info = loc.split(',')
+		smarts = []
+		for i in loc:
+		  #dev = i.split(':')
+		  dev = i.split(' ')
+		  smart_infos = commands.getoutput("smartctl -A /dev/%s"%dev[1].strip()) #new
+		  print "\n\n%s \n\n%s"%(i,smart_infos)
+		
+		print "Disk Total: %s"%len(loc)
+#		  smarts.append(Smart_select(dev))
+	else:
+		smarts = []
+		for i in location[1:]:
+			device = []
+			devices = {}
+			dev_info = i.split(' ')
+			smart_infos = commands.getoutput("smartctl -A /dev/%s"%dev_info[1].strip()) #new
+			print "\n\n%s \n\n%s"%(i,smart_infos)
+		print "Disk Total: %s"%len(location[1:])
+#			smarts.append(Smart_select(dev_info))
+		
+#		print smarts
